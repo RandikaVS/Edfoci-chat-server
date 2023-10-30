@@ -43,7 +43,7 @@ app.use(errorHandler);
 const io = require('socket.io')(server,{
   pingTimeout:60000,
   cors:{
-      origin:"http://localhost:3003", 
+      origin:["http://localhost:3003", "https://manage-dev.edfoci.com"], 
   },
 })
 
