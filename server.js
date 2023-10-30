@@ -20,12 +20,6 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT ||5000;
 
-app.use("/chat/api/chat",chatRoutes);
-app.use("/chat/api/message",messageRoutes); 
-
-app.use(notFound);
-app.use(errorHandler);
-
 const server = app.listen(
   PORT,
   console.log(`Server running on PORT ${PORT}...`.yellow.bold)
@@ -35,16 +29,23 @@ if(server){
   console.log("Success".green.bold);
 }
 
+
+app.get("/", (req, res) => {
+  res.send("Api is running");
+});
+
+app.use("/chat/api/chat",chatRoutes);
+app.use("/chat/api/message",messageRoutes); 
+
+app.use(notFound);
+app.use(errorHandler);
+
 const io = require('socket.io')(server,{
   pingTimeout:60000,
   cors:{
       origin:["http://localhost:3003", "https://manage-dev.edfoci.com/"], 
   },
 })
-
-app.get("/", (req, res) => {
-  res.send("Api is running");
-});
 
 io.on("connection",(Socket) =>{
   console.log('Connected to socket.io');
