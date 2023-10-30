@@ -42,6 +42,10 @@ const io = require('socket.io')(server,{
   },
 })
 
+app.get("/", (req, res) => {
+  res.send("Api is running");
+});
+
 io.on("connection",(Socket) =>{
   console.log('Connected to socket.io');
 
