@@ -9,7 +9,6 @@ const { notFound, errorHandler } = require("./middleware/errorMiddleware");
 const path = require("path");
 const {chats} = require("./data/data");
 const {Socket} = require('socket.io')
-import { Server } from "socket.io";
 
 dotenv.config();
 connectDB();
@@ -41,28 +40,27 @@ app.use("/chat/api/message",messageRoutes);
 app.use(notFound);
 app.use(errorHandler);
 
-// const io = require('socket.io')(server,{
-//   pingTimeout:60000,
-//   cors:{
-//       origin:["http://localhost:3003", "https://manage-dev.edfoci.com"], 
-//   },
-// })
+const io = require('socket.io')(server,{
+  pingTimeout:60000,
+  cors:{
+      origin:["http://localhost:3003", "https://manage-dev.edfoci.com"], 
+  },
+})
 
-const io = new Server(server);
 
 io.on("connection",(Socket) =>{
   console.log('Connected to socket.io');
 
   Socket.on("setup",(userData) =>{
     Socket.join(String(userData.lg_user_id));
-    console.log(typeof userData.lg_user_id);
     Socket.emit('connected');
-  });
+  })
 
   Socket.on('join chat',(room)=>{
       Socket.join(room);
       console.log("user jointed room "+room);
   });
+
 
   Socket.on('typing',(room)=>Socket.in(room).emit("typing"));
 
