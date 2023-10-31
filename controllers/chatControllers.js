@@ -150,9 +150,7 @@ const renameGroup = asyncHandler(async (req, res) => {
     {
       new: true,
     }
-  )
-    .populate("users")
-    .populate("groupAdmin");
+  ).populate("latestMessage")
 
   if (!updatedChat) {
     res.status(404);
@@ -167,20 +165,17 @@ const renameGroup = asyncHandler(async (req, res) => {
 // @access  Protected
 const removeFromGroup = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
-
   // check if the requester is admin
 
   const removed = await Chat.findByIdAndUpdate(
     chatId,
     {
-      $pull: { users: userId },
+      $pull: { users: { $in: Array.isArray(userId) ? userId : [userId] } },
     },
     {
       new: true,
     }
-  )
-    .populate("users")
-    .populate("groupAdmin");
+  ).populate("latestMessage")
 
   if (!removed) {
     res.status(404);
@@ -195,20 +190,17 @@ const removeFromGroup = asyncHandler(async (req, res) => {
 // @access  Protected
 const addToGroup = asyncHandler(async (req, res) => {
   const { chatId, userId } = req.body;
-
   // check if the requester is admin
 
   const added = await Chat.findByIdAndUpdate(
     chatId,
     {
-      $push: { users: userId },
+      $push: { users: Array.isArray(userId) ? userId : [userId] },
     },
     {
       new: true,
     }
-  )
-    .populate("users")
-    .populate("groupAdmin");
+  ).populate("latestMessage")
 
   if (!added) {
     res.status(404);

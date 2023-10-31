@@ -6,9 +6,6 @@ const dotenv = require("dotenv");
 const chatRoutes = require("./routes/chatRoutes");
 const messageRoutes = require("./routes/messageRoutes");
 const { notFound, errorHandler } = require("./middleware/errorMiddleware");
-const path = require("path");
-const {chats} = require("./data/data");
-const {Socket} = require('socket.io')
 
 dotenv.config();
 connectDB();
@@ -29,10 +26,6 @@ if(server){
   console.log("Success".green.bold);
 }
 
-
-app.get("/", (req, res) => {
-  res.send("Api is running");
-});
 
 app.use("/chat/api/chat",chatRoutes);
 app.use("/chat/api/message",messageRoutes); 
@@ -58,7 +51,6 @@ io.on("connection",(Socket) =>{
 
   Socket.on('join chat',(room)=>{
       Socket.join(room);
-      console.log("user jointed room "+room);
   });
 
 
@@ -74,10 +66,8 @@ io.on("connection",(Socket) =>{
 
     chat.users.forEach(user => {
 
-      //if(user == newMessageReceived.sender) return;
-      console.log(typeof user);
+      if(user == newMessageReceived.sender) return;
       Socket.in(user).emit("message received", newMessageReceived)
-
     });
     
   });
