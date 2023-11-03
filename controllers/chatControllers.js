@@ -170,9 +170,10 @@ const removeFromGroup = asyncHandler(async (req, res) => {
   const removed = await Chat.findByIdAndUpdate(
     chatId,
     {
-      $pull: { users: { $in: Array.isArray(userId) ? userId : [userId] } },
+      $pull: { users: { _id: { $in: userId } } }
     },
     {
+      multi: true,
       new: true,
     }
   ).populate("latestMessage")
