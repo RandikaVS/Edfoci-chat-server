@@ -82,7 +82,7 @@ try{
     if(!chat.users) return console.log('chat.users not defined');
 
     chat.users.forEach(user => {
-      // if(user.lg_user_id == newMessageReceived.sender.lg_user_id && user.lg_user_table_id == newMessageReceived.sender.lg_user_table_id) return;
+      if(user.lg_user_id == newMessageReceived.sender.lg_user_id && user.lg_user_table_id == newMessageReceived.sender.lg_user_table_id) return;
       Socket.in(user.lg_user_id).emit("message received", newMessageReceived)
     });
     
