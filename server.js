@@ -36,63 +36,54 @@ app.use(errorHandler);
 const io = require('socket.io')(server,{
   pingTimeout:60000,
   cors:{
-      origin:["http://localhost:3003", "https://manage-dev.edfoci.com"], 
+      origin:["http://localhost:3003", "https://manage-dev.edfoci.com","https://manage-qa.edfoci.com"], 
   },
 })
 
 
 io.on("connection",(Socket) =>{
 
-  try {
     Socket.on("setup",(userData) =>{
       Socket.join(String(userData.lg_user_id));
       Socket.emit('connected');
     })
-  }
-  catch(error){
-    console.log(error);
-  }
 
-  try{
     Socket.on('join chat',(room)=>{
       Socket.join(room);
     });
-  }
-  catch(error){
-    console.log(error);
-  }
   
-try{
-  Socket.on('typing',(room,currentUser)=>{
-    Socket.in(room).emit("typing",currentUser.name)
-  })
+    Socket.on('typing',(room,currentUser)=>{
+      Socket.in(room).emit("typing",currentUser.name)
+    })
 
-  Socket.on('stop typing',(room)=>{
-    Socket.in(room).emit("stop typing")
-  });
-}
-catch(error){
-  console.log(error);
-}
-  
-try{
-  Socket.on("new message",(newMessageReceived)=>{
-    var chat = newMessageReceived.chat;
-
-    if(!chat.users) return console.log('chat.users not defined');
-
-    chat.users.forEach(user => {
-      if(user.lg_user_id == newMessageReceived.sender.lg_user_id && user.lg_user_table_id == newMessageReceived.sender.lg_user_table_id) return;
-      Socket.in(user.lg_user_id).emit("message received", newMessageReceived)
+    Socket.on('stop typing',(room)=>{
+      Socket.in(room).emit("stop typing")
     });
-    
-  });
-}catch(error){
-  console.log(error);
-}
+  
+    Socket.on("new message",(newMessageReceived)=>{
+      var chat = newMessageReceived.chat;
 
-  Socket.off("setup",()=>{
-    console.log("USER DISCONNECTED").red.bold;
-    Socket.leave(userData.lg_user_id)
-  })
+      if(!chat.users) return console.log('chat.users not defined');
+      
+      chat.users.forEach(user => {
+        if(user.lg_user_id == newMessageReceived.sender.lg_user_id && user.lg_user_table_id == newMessageReceived.sender.lg_user_table_id) return;
+        Socket.in(user.lg_user_id).emit("message received", newMessageReceived)
+      });
+      
+    });
+
+    Socket.off("setup",()=>{
+      console.log("USER DISCONNECTED".red.bold);
+      Socket.leave(userData.lg_user_id)
+    })
+
+    Socket.on('unsubscribe',function(user){  
+      try{
+        console.log("USER DISCONNECTED".red.bold);
+        Socket.leave(user.lg_user_id);
+      }catch(e){
+        console.log('[error]','leave room :', e);
+        Socket.emit('error','couldnt perform requested action');
+      }
+    })
 });
