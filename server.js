@@ -73,16 +73,13 @@ io.on("connection",(Socket) =>{
     });
 
     Socket.off("setup",()=>{
-      console.log("USER DISCONNECTED".red.bold);
       Socket.leave(userData.lg_user_id)
     })
 
     Socket.on('unsubscribe',function(user){  
       try{
-        console.log("USER DISCONNECTED".red.bold);
         Socket.leave(user.lg_user_id);
       }catch(e){
-        console.log('[error]','leave room :', e);
         Socket.emit('error','couldnt perform requested action');
       }
     })
