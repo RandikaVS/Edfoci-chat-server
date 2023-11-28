@@ -1,6 +1,7 @@
 const asyncHandler = require("express-async-handler");
 const Chat = require("../models/chatModel");
 const User = require("../models/userModel");
+const Message = require("../models/messageModel")
 
 //@description     Create or fetch One to One Chat
 //@route           POST /api/chat/
@@ -211,6 +212,41 @@ const addToGroup = asyncHandler(async (req, res) => {
   }
 });
 
+const syncNameWithChat = asyncHandler(async(req,res)=>{
+
+  const { userId,tableId,newName } = req.body;
+console.log( userId,tableId,newName);
+  try{
+    // Update name in the Chat model
+    await Chat.updateMany(
+      { users: { $elemMatch: { lg_user_id: userId, lg_user_table_id: tableId } } },
+      { $set: { "users.$.name": newName } }
+    );
+
+    // Update group admin name in the Chat model
+    await Chat.updateMany(
+      { "groupAdmin.lg_user_id": userId, "groupAdmin.lg_user_table_id": tableId },
+      { $set: { "groupAdmin.name": newName } }
+    );
+
+    // Update name in the Message model (sender field)
+    await Message.updateMany(
+      { "sender.lg_user_id": userId, "sender.lg_user_table_id": tableId },
+      { $set: { "sender.name": newName } }
+    );
+
+    // Update name in the Message model (readBy array)
+    await Message.updateMany(
+      { "readBy.lg_user_id": userId, "readBy.lg_user_table_id": tableId },
+      { $set: { "readBy.$.name": newName } }
+    );
+    res.status(200).json({ success: true, message: "User name updated successfully." });
+  }
+  catch(error){
+    res.status(500).json({ success: false, message: "Internal server error" });
+  }
+})
+
 module.exports = {
   accessChat,
   fetchChats,
@@ -218,5 +254,6 @@ module.exports = {
   renameGroup,
   addToGroup,
   removeFromGroup,
-  fetchChatByChatId
+  fetchChatByChatId,
+  syncNameWithChat
 };

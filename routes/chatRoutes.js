@@ -6,7 +6,8 @@ const {
   removeFromGroup,
   addToGroup,
   renameGroup,
-  fetchChatByChatId
+  fetchChatByChatId,
+  syncNameWithChat
 } = require("../controllers/chatControllers");
 const { protect } = require("../middleware/authMiddleware");
 
@@ -19,5 +20,6 @@ router.route("/group").post(createGroupChat);
 router.route("/rename").put(renameGroup);
 router.route("/groupremove").put(removeFromGroup);
 router.route("/groupadd").put(addToGroup);
+router.route("/sync-userName").put(syncNameWithChat);
 
 module.exports = router;
