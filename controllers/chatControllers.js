@@ -93,13 +93,46 @@ const fetchChatByChatId = asyncHandler(async (req, res) => {
       res.status(500).json({ message: "Internal server error" });
     });
 
-} catch (error) {
-    console.log("fail to load the chats".red.bold);
-    res.status(400);
-    throw new Error (error.message);
-    
-}
+  } catch (error) {
+      console.log("fail to load the chats".red.bold);
+      res.status(400);
+      throw new Error (error.message);
+      
+  }
 });
+
+const fetchChatsByIdAndUserDetails = asyncHandler(async (req, res) => {
+  const { chatList } = req.body;
+  const { lg_user_id, lg_user_table_id } = req.body.userDetails;
+
+  try {
+    // Find chats with the provided chatList and matching user details
+    const results = await Chat.find({
+      $and: [
+        { _id: { $in: chatList } },
+        {
+          $or: [
+            { "users": { $elemMatch: { lg_user_id, lg_user_table_id } } },
+            { "groupAdmin.lg_user_id": lg_user_id, "groupAdmin.lg_user_table_id": lg_user_table_id }
+          ]
+        }
+      ]
+    }).populate("latestMessage");
+
+    if (!results || results.length === 0) {
+      // No matching chats found, return a 404 response
+      return res.status(200).json({ code:0, message: "Chats not found" });
+    }
+
+    // Matching chats found, return a 200 response with the chat data
+    res.status(200).json({code:1,results});
+  } catch (error) {
+    console.log("Failed to load the chats".red.bold);
+    res.status(500).json({ code:-1, message: "Internal server error" });
+  }
+});
+
+
 
 //@description     Create New Group Chat
 //@route           POST /api/chat/group
@@ -255,5 +288,6 @@ module.exports = {
   addToGroup,
   removeFromGroup,
   fetchChatByChatId,
+  fetchChatsByIdAndUserDetails,
   syncNameWithChat
 };

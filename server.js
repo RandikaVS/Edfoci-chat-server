@@ -62,7 +62,6 @@ io.on("connection",(Socket) =>{
   
     Socket.on("new message",(newMessageReceived)=>{
       var chat = newMessageReceived.chat;
-
       if(!chat.users) return console.log('chat.users not defined');
       
       chat.users.forEach(user => {
@@ -73,14 +72,17 @@ io.on("connection",(Socket) =>{
     });
 
     Socket.off("setup",()=>{
-      Socket.leave(userData.lg_user_id)
+      Socket.leave(String(userData.lg_user_id));
     })
 
     Socket.on('unsubscribe',function(user){  
       try{
-        Socket.leave(user.lg_user_id);
+        Socket.leave(String(user.lg_user_id));
       }catch(e){
         Socket.emit('error','couldnt perform requested action');
       }
     })
+    Socket.on('leave chat',(room)=>{
+      Socket.leave(room);
+    });
 });
