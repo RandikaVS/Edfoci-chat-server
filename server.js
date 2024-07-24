@@ -15,7 +15,7 @@ app.use(cors());
 app.use(express.json());
 app.use(bodyParser.json());
 
-const PORT = process.env.PORT ||5000;
+const PORT = process.env.PORT || 5000;
 
 const server = app.listen(
   PORT,
